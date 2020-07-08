@@ -1,0 +1,5 @@
+drum_data/*
+epoch_images/*
+training_checkpoints_audio_gan/*
+*.npy
+*.h5
