@@ -1,0 +1,131 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2020_conference,times,natbib}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage[hyphens,spaces,obeyspaces]{url}
+\usepackage{hyperref}
+\iclrfinalcopy
+
+\usepackage{array}
+%\renewcommand{\arraystretch}{1.5}
+
+\title{Instrumental audio synthesis using GANs \\ Project Proposal}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Group N\\Etienne Leclerc (V00853992), Jordie Shier (V00688891), Lu Lu (V00836042),\\ Yangruirui Wang (V00949204
+), and Ziyi Feng (V00940985)}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+
+
+\maketitle
+
+\section{Problem Definition}
+Music producers and sound-effect artists require the frequent use of audio samples, for example to simulate a snare drum hit or a gunshot sound. The process of arduously searching through multi-gigabyte sound libraries for the right sound is extremely time-consuming; and its alternative, of creating a brand new sound using audio synthesizers, requires a formidable technical background. To compound this difficulty, in a track or action scene containing hundreds of snare drum hits or gunshots, the process of using the same (or same few) samples repeatedly can lead to a canned effect. What is required is a method for simultaneously trimming down the size of a library while simultaneously (and in some sense paradoxically) increasing sound variability.
+
+The problem we would like to tackle in our project is using Generative Adversarial Networks (GANs) \citep{goodfellow2014generative} to generate new instrumental audio from a dataset of existing material. GANs have the potential to be used to generate new sounds on the fly, and can be used to interpolate between sounds to help music producers hone in on a desired sound. This would dramatically alleviate both the problem of having to pore through giant sound libraries, and the problem with having to only use one sample repeatedly. In addition, the explosion of new sounds which could potentially be produced by GANs would vastly reduce recording costs by designers of sound libraries.
+
+This research avenue is to a certain degree untapped: GANs have been successfully applied to the generation and manipulation of images, however, relatively little work has been focused on the audio domain. Research related to the specific work proposed here was presented by \citet{donahue2018adversarial}  and \citet{engel2018gansynth}.
+
+The goal of our project will be to implement a GAN, similar to the one proposed by \citet{donahue2018adversarial}, and train it using audio samples recorded from instrumental sounds including brass, string, reed, and mallet instruments. We will use the freely available NSynth dataset\footnote{\url{https://magenta.tensorflow.org/datasets/nsynth}}, published by \citet{nsynth2017} from Google's Magenta research lab. The NSynth dataset contains over 300k four second long audio samples of labelled musical instruments.
+
+\section{Goals}
+As described in the first section, our goal in this project is to use Generative Adversarial Networks (GANs) to generate new instrumental audio from the NSynth dataset. There are two main components in a GAN: the generator network that is tasked with generating new material, and a discriminator network that has been pre-trained on a dataset and is tasked with classifying input data as real or fake. During training the generator learns how to fool the discriminator and create realistic material. In our project we will train the discriminator on short audio samples of solo instrumental audio with the goal of producing a generator that can create new instrumental sounds.
+
+From our research so far, we have learned GANs are challenging to evaluate using objective measurements, although some metrics have been proposed. \citet{donahue2018adversarial} used two objective measures: \emph{inception score} and \emph{nearest neighbour} comparisons and we will use both of those measurements.
+
+In addition to those objective measurements, \citet{donahue2018adversarial} carried out a subjective evaluation to further verify the quality of their results. While performing a full subjective assessment is beyond the scope of this class project, we would like to create a simple 'Turing test' to share with some friends and family as an informal evaluation.
+
+If we are ahead of schedule, we will try a variation on the generator and discriminator. Then will have two generators and two discriminators and can do a comparison on them to find out which combination is better. An additional stretch goal will be to implement an interface for interpolating between generated sounds.
+
+\section{Plan}
+There are five main stages for keeping track of our progress. The first stage is to do relevant research, and this stage will include checking out certain papers or books and talking to certain people who are familiar with this topic. After we get enough information, we will implement and train the GAN. This implementation state will occur for a little over two weeks. Then the next two stages are about evaluating the model using objective and subjective methods. Stage 5 is a stretch goal if we have extra time. And lastly, we will wrap up what we have done and write the final report. Throughout our project, to ensure everyone is involved and participates, we will hold a Zoom meeting every Friday to share new information and set goals for the next week. We also are engaging in regular conversation through a Slack workspace.
+
+\subsection{Stage 1: Research}
+\emph{Dates:} June 12 - July 3
+
+As GANs are a new topic for all of us, research and learning will be a large part of the early stages of our project. During this phase of our work we will be conducting independent research and sharing our findings as informal presentations during our weekly Zoom call. We have put together a list of resources that will be helpful for us throughout our project:
+\begin{itemize}
+  \item Online tutorial on audio synthesis with GANs \citep{pasini2019syngan}
+  \item Related papers on audio synthesis using GANs \citep{donahue2018adversarial, engel2018gansynth}
+  \item Deep learning textbook \citep{lecun2015deep}
+  \item Machine Learning Mastery (this tutorial on GAN latent space interpolation could be helpful for the stretch goal of interpolating between sounds) \citep{brownlee2019ganlatent}
+  \item Original GAN paper \citep{goodfellow2014generative}
+  \item Tutorial on GANs \citep{goodfellow2016nips}
+  \item Additionally, Jordie's supervisor George Tzanetakis will be a valuable resource for questions regarding audio processing
+\end{itemize}
+
+\subsection{Stage 2: Implementation}
+\emph{Dates:} July 4 - July 20
+
+The goal of the implementation stage is to produce a functioning GAN that can generate new instrumental audio after being trained on audio samples from the NSynth dataset. We plan on using TensorFlow\footnote{\url{https://www.tensorflow.org/}} to implement a model similar to the one proposed by \citep{donahue2018adversarial}. Implementation will be broken into four subsections: data preparation, generator implementation, discriminator implementation, and integration. Data preparation will consist of selecting the instruments that we want to use to train the GAN on. We plan on trying several different types of selections such as training using brass sounds only, or training using a combination of different instrumental sounds.
+
+Our team will split up into two smaller groups to implement the GAN. One team will implement the generator network and another team will implement and train the discriminator network. Once both of these networks are constructed and the discriminator is trained, we will integrate them and train the full GAN network.
+ 
+In addition to experimenting with training with different datasets, we would like to experiment with tuning network hyper-parameters and compare results. The amount that we will be able to do this will depend on how long it will take to train the network, which is an unknown factor to us at this point, although we are anticipating several hours to train each model.
+
+Our main goal is to implement one GAN model, however, if we are ahead of schedule at this point we would like to implement a variation on the GAN proposed by \citep{donahue2018adversarial} by using Mel-Frequency Cepstral Coefficients, which are a type of audio transform that are more perceptually relevant to human hearing and could potentially produce improved results.
+\subsection{Stage 3: Objective Evaluation}
+\emph{Dates:} July 21 - July 27
+
+To objectively measure the quality of our implemented GAN we will use inception score and nearest neighbour evaluation, which was used by \citet{donahue2018adversarial}. Inception score can be used to evaluate whether the sound generated by the generator is close to the real sound \citep{xu2018empirical}. We can calculate the similarity rate or score from this in order to evaluate and optimize our generator.
+
+\subsection{Stage 4: Informal Subjective Evaluation}
+\emph{Dates:} July 21 - July 27
+
+Create a simple \emph{Turing Test} to share with some friends and family as an informal evaluation. In this informal evaluation we will share the audio results generated from our GAN and get subjects to rate the quality.
+
+\subsection{Stage 5: Interpolation (Stretch Goal)}
+\emph{Dates:} July 21 - July 27
+
+Interpolation is a stretch goal that we would like to implement if we have time. The goal of this stage would be to provide a way to interpolate between sounds by linearly moving between two points in the generator latent space. This goal was inspired by image GANs that show smooth interpolation between different faces. Being able to smoothly adjust and move between different sounds would be a useful feature for music producers and sound effect designers. The tutorial by \citet{brownlee2019ganlatent} will be helpful at this stage. 
+
+\subsection{Stage 6: Project Report}
+\emph{Dates:} July 28 - August 1
+
+Wrap up project and document results in the final project report.
+
+\section{Task Breakdown}
+Table \ref{tasks} highlights the contributions that each member of our team will make towards the completion of our project. The generator and discriminator tasks refer to implementing each of those models using the TensorFlow library. Additionally, for the discriminator task, that will also include training on selected subsets of the NSynth dataset. Preparation of the training material from NSynth is included in the data preparation task. The integration task involves putting the generator and discriminator together and training the generator. The generator will then be evaluated by all group members using two objective methods as well as an informal subjective evaluation.
+% Task breakdown table
+\begin{table}[t]
+\caption{Project Task Breakdown}
+\label{tasks}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|p{2cm}|}
+\hline 
+\multicolumn{1}{|c|}{\bf}  &\multicolumn{1}{c|}{\bf Generator} &\multicolumn{1}{c|}{\bf Discriminator} &\multicolumn{1}{p{1.75cm}|}{\bf Data\break Preparation} &\multicolumn{1}{c|}{\bf Integration} &\multicolumn{1}{c|}{\bf Evaluation}
+\\ \hline
+Etienne Leclerc   	& &\checkmark &\checkmark &\checkmark & Informal\break Subjective,\break Inception\\ \hline
+Jordie Shier      	& &\checkmark &\checkmark &\checkmark &Informal\break Subjective,\break Inception\\ \hline
+Lu Lu             	&\checkmark & &\checkmark & &Informal\break Subjective\\ \hline
+Yangruirui Wang		& &\checkmark &\checkmark & &Informal\ Subjective,\break Nearest\break Neighbour\\ \hline
+Ziyi Feng			&\checkmark & &\checkmark & &Informal\ Subjective,\break Nearest\break Neighbour\\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\newpage
+\bibliography{csc503.bib}
+\bibliographystyle{iclr2020_conference}
+
+\end{document}

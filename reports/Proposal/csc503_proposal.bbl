@@ -1,0 +1,66 @@
+\begin{thebibliography}{9}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Brownlee(2019)]{brownlee2019ganlatent}
+Jason Brownlee.
+\newblock How to explore the gan latent space when generating faces, 2019.
+\newblock URL
+  \url{https://machinelearningmastery.com/how-to-interpolate-and-perform-vector-arithmetic-with-faces-using-a-generative-adversarial-network/}.
+
+\bibitem[Donahue et~al.(2018)Donahue, McAuley, and
+  Puckette]{donahue2018adversarial}
+Chris Donahue, Julian McAuley, and Miller Puckette.
+\newblock Adversarial audio synthesis.
+\newblock In \emph{International Conference on Learning Representations}, 2018.
+
+\bibitem[Engel et~al.(2017)Engel, Resnick, Roberts, Dieleman, Eck, Simonyan,
+  and Norouzi]{nsynth2017}
+Jesse Engel, Cinjon Resnick, Adam Roberts, Sander Dieleman, Douglas Eck, Karen
+  Simonyan, and Mohammad Norouzi.
+\newblock Neural audio synthesis of musical notes with wavenet autoencoders,
+  2017.
+
+\bibitem[Engel et~al.(2018)Engel, Agrawal, Chen, Gulrajani, Donahue, and
+  Roberts]{engel2018gansynth}
+Jesse Engel, Kumar~Krishna Agrawal, Shuo Chen, Ishaan Gulrajani, Chris Donahue,
+  and Adam Roberts.
+\newblock Gansynth: Adversarial neural audio synthesis.
+\newblock In \emph{International Conference on Learning Representations}, 2018.
+
+\bibitem[Goodfellow(2016)]{goodfellow2016nips}
+Ian Goodfellow.
+\newblock Nips 2016 tutorial: Generative adversarial networks.
+\newblock \emph{arXiv preprint arXiv:1701.00160}, 2016.
+
+\bibitem[Goodfellow et~al.(2014)Goodfellow, Pouget-Abadie, Mirza, Xu,
+  Warde-Farley, Ozair, Courville, and Bengio]{goodfellow2014generative}
+Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley,
+  Sherjil Ozair, Aaron Courville, and Yoshua Bengio.
+\newblock Generative adversarial nets.
+\newblock In \emph{Advances in neural information processing systems}, pp.\
+  2672--2680, 2014.
+
+\bibitem[LeCun et~al.(2015)LeCun, Bengio, and Hinton]{lecun2015deep}
+Yann LeCun, Yoshua Bengio, and Geoffrey Hinton.
+\newblock Deep learning.
+\newblock \emph{nature}, 521\penalty0 (7553):\penalty0 436--444, 2015.
+
+\bibitem[Pasini(2019)]{pasini2019syngan}
+Marco Pasini.
+\newblock Synthesizing audio with generative adversarial networks, 2019.
+\newblock URL
+  \url{https://towardsdatascience.com/synthesizing-audio-with-generative-adversarial-networks-8e0308184edd}.
+
+\bibitem[Xu et~al.(2018)Xu, Huang, Yuan, Guo, Sun, Wu, and
+  Weinberger]{xu2018empirical}
+Qiantong Xu, Gao Huang, Yang Yuan, Chuan Guo, Yu~Sun, Felix Wu, and Kilian
+  Weinberger.
+\newblock An empirical study on evaluation metrics of generative adversarial
+  networks.
+\newblock \emph{arXiv preprint arXiv:1806.07755}, 2018.
+
+\end{thebibliography}
