@@ -1,49 +1,19 @@
-This is BibTeX, Version 0.99d (TeX Live 2016)
-Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
-The top-level auxiliary file: /Users/jshier/Development/Academic/CSC503/audio_gan/reports/Progress Report/csc503_progress_report.aux
+This is BibTeX, Version 0.99dThe top-level auxiliary file: csc503_progress_report.aux
+I couldn't open database file csc503.bib.bib
+---line 39 of file csc503_progress_report.aux
+ : \bibdata{csc503.bib
+ :                    }
+I'm skipping whatever remains of this command
 The style file: iclr2020_conference.bst
-Database file #1: csc503.bib.bib
-Warning--entry type for "pasini2019syngan" isn't style-file defined
---line 47 of file csc503.bib.bib
-You've used 9 entries,
-            2773 wiz_defined-function locations,
-            638 strings with 6715 characters,
-and the built_in function-call counts, 4588 in all, are:
-= -- 368
-> -- 354
-< -- 4
-+ -- 120
-- -- 111
-* -- 375
-:= -- 717
-add.period$ -- 26
-call.type$ -- 9
-change.case$ -- 64
-chr.to.int$ -- 9
-cite$ -- 18
-duplicate$ -- 189
-empty$ -- 339
-format.name$ -- 120
-if$ -- 945
-int.to.chr$ -- 1
-int.to.str$ -- 1
-missing$ -- 6
-newline$ -- 52
-num.names$ -- 36
-pop$ -- 150
-preamble$ -- 1
-purify$ -- 55
-quote$ -- 0
-skip$ -- 165
-stack$ -- 0
-substring$ -- 83
-swap$ -- 23
-text.length$ -- 1
-text.prefix$ -- 0
-top$ -- 0
-type$ -- 99
-warning$ -- 0
-while$ -- 32
-width$ -- 0
-write$ -- 115
-(There was 1 warning)
+I found no database files---while reading file csc503_progress_report.aux
+Warning--I didn't find a database entry for "donahue2018adversarial"
+Warning--I didn't find a database entry for "gao2018deep"
+Warning--I didn't find a database entry for "engel2018gansynth"
+Warning--I didn't find a database entry for "arjovsky2017wasserstein"
+Warning--I didn't find a database entry for "gulrajani2017improved"
+Warning--I didn't find a database entry for "pasini2019syngan"
+Warning--I didn't find a database entry for "lecun2015deep"
+Warning--I didn't find a database entry for "brownlee2019ganlatent"
+Warning--I didn't find a database entry for "goodfellow2014generative"
+Warning--I didn't find a database entry for "goodfellow2016nips"
+(There were 2 error messages)

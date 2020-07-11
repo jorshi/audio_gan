@@ -8,11 +8,13 @@
 \usepackage[hyphens,spaces,obeyspaces]{url}
 \usepackage{hyperref}
 \iclrfinalcopy
-
 \usepackage{array}
+\usepackage{graphicx} 
+\usepackage{float} 
+\usepackage{subfigure} 
 %\renewcommand{\arraystretch}{1.5}
 
-\title{Instrumental audio synthesis using GANs \\ Project Proposal}
+\title{Instrumental audio synthesis using GANs \\ Progress Report}
 
 % Authors must not appear in the submitted version. They should be hidden
 % as long as the \iclrfinalcopy macro remains commented out below.
@@ -38,90 +40,99 @@
 
 \maketitle
 
-\section{Problem Definition}
-Music producers and sound-effect artists require the frequent use of audio samples, for example to simulate a snare drum hit or a gunshot sound. The process of arduously searching through multi-gigabyte sound libraries for the right sound is extremely time-consuming; and its alternative, of creating a brand new sound using audio synthesizers, requires a formidable technical background. To compound this difficulty, in a track or action scene containing hundreds of snare drum hits or gunshots, the process of using the same (or same few) samples repeatedly can lead to a canned effect. What is required is a method for simultaneously trimming down the size of a library while simultaneously (and in some sense paradoxically) increasing sound variability.
+\section{Problem definition}
+As described in our formal proposal, the goal of our project will be to implement a GAN, similar to the one proposed by \citet{donahue2018adversarial}, and train it using audio samples recorded from instrumental sounds including brass, string,reed, and mallet instruments. The project will be useful to music producers and sound effect artists, who otherwise require the use of gigantic audio libraries yet too-limited collections of samples
 
-The problem we would like to tackle in our project is using Generative Adversarial Networks (GANs) \citep{goodfellow2014generative} to generate new instrumental audio from a dataset of existing material. GANs have the potential to be used to generate new sounds on the fly, and can be used to interpolate between sounds to help music producers hone in on a desired sound. This would dramatically alleviate both the problem of having to pore through giant sound libraries, and the problem with having to only use one sample repeatedly. In addition, the explosion of new sounds which could potentially be produced by GANs would vastly reduce recording costs by designers of sound libraries.
 
-This research avenue is to a certain degree untapped: GANs have been successfully applied to the generation and manipulation of images, however, relatively little work has been focused on the audio domain. Research related to the specific work proposed here was presented by \citet{donahue2018adversarial}  and \citet{engel2018gansynth}.
+This problem has not altered so much as crystallized and been made more specific. We will be basing our approach on that undertaken by  \citet{donahue2018adversarial}. In their paper, they describe two algorithms based on Deep Convolutional Generative Adversarial Networks (DC GAN) \citet{gao2018deep}: SpecGAN, which applies image transformation to spectrograms; and WaveGAN, which uses the one-dimensional structure of an audio time-series more directly.
 
-The goal of our project will be to implement a GAN, similar to the one proposed by \citet{donahue2018adversarial}, and train it using audio samples recorded from instrumental sounds including brass, string, reed, and mallet instruments. We will use the freely available NSynth dataset\footnote{\url{https://magenta.tensorflow.org/datasets/nsynth}}, published by \citet{nsynth2017} from Google's Magenta research lab. The NSynth dataset contains over 300k four second long audio samples of labelled musical instruments.
+
+We have decided to investigate the latter approach, and use \citet{donahue2018adversarial}as a springboard from which to implement WaveGAN-like features. The code for WaveGAN is publicly available on Github; however, for our own intellectual edification we will be pursuing a parallel course, and try to independently derive our own results. In addition, we would like to implement some of our own ideas; see the following section.
+
+If time permits, we will also attempt a stretch goal of interpolation between instrument types. Such functionality would be extremely useful to music producers, who would now have access to a dizzying array of hybrid instruments.
+
+
+We will use the freely available NSynth dataset, published by \citet{engel2018gansynth} from Google’s Magenta research lab. The NSynth dataset contains over 300k four second long audio samples of labelled musical instruments. We have not yet properly explored this resource, having relied mainly on a smaller library of snare drum sounds.
 
 \section{Goals}
-As described in the first section, our goal in this project is to use Generative Adversarial Networks (GANs) to generate new instrumental audio from the NSynth dataset. There are two main components in a GAN: the generator network that is tasked with generating new material, and a discriminator network that has been pre-trained on a dataset and is tasked with classifying input data as real or fake. During training the generator learns how to fool the discriminator and create realistic material. In our project we will train the discriminator on short audio samples of solo instrumental audio with the goal of producing a generator that can create new instrumental sounds.
+As described in the first section, our goal in this project is to use Generative Adversarial Networks (GANs) to generate new instrumental audio from the NSynth dataset. There are two main components in a GAN: the generator network that is tasked with generating new material, and a discriminator network that is tasked with classifying input data as real or fake. The generator and discriminator are trained in parallel with the goal of creating a generator that can produce realistic audio material, which is judged by the discriminator. In our project we will train the generator and discriminator using short audio samples of solo instrumental audio with the goal of producing a generator that can create new instrumental sounds.	
 
-From our research so far, we have learned GANs are challenging to evaluate using objective measurements, although some metrics have been proposed. \citet{donahue2018adversarial} used two objective measures: \emph{inception score} and \emph{nearest neighbour} comparisons and we will use both of those measurements.
-
-In addition to those objective measurements, \citet{donahue2018adversarial} carried out a subjective evaluation to further verify the quality of their results. While performing a full subjective assessment is beyond the scope of this class project, we would like to create a simple 'Turing test' to share with some friends and family as an informal evaluation.
-
-If we are ahead of schedule, we will try a variation on the generator and discriminator. Then will have two generators and two discriminators and can do a comparison on them to find out which combination is better. An additional stretch goal will be to implement an interface for interpolating between generated sounds.
-
-\section{Plan}
-There are five main stages for keeping track of our progress. The first stage is to do relevant research, and this stage will include checking out certain papers or books and talking to certain people who are familiar with this topic. After we get enough information, we will implement and train the GAN. This implementation state will occur for a little over two weeks. Then the next two stages are about evaluating the model using objective and subjective methods. Stage 5 is a stretch goal if we have extra time. And lastly, we will wrap up what we have done and write the final report. Throughout our project, to ensure everyone is involved and participates, we will hold a Zoom meeting every Friday to share new information and set goals for the next week. We also are engaging in regular conversation through a Slack workspace.
-
-\subsection{Stage 1: Research}
-\emph{Dates:} June 12 - July 3
-
-As GANs are a new topic for all of us, research and learning will be a large part of the early stages of our project. During this phase of our work we will be conducting independent research and sharing our findings as informal presentations during our weekly Zoom call. We have put together a list of resources that will be helpful for us throughout our project:
+From our research so far, we have learned GANs are challenging to evaluate using objective measurements, although some metrics have been proposed. \citet{donahue2018adversarial} used two objective measures:\emph{inception score} and \emph{nearest neighbour} comparisons and we will use both of those mea- surements. Additionally, the Donahue paper attempts a \emph{Feline Turing Test}, wherein the authors’ cats were presented with generated bird sounds over the course of the project; the cats level of alertness increased as the quality of the samples improved. We will instead use some of our cattier friends and family. 
+As we have completed the initial research phase and have begun development, we have been able to make our goals more specific. The specific outcome that we would like to achieve is the development of a GAN that is able to produce instrumental audio samples that are one second long at a sampling rate of 16kHz. We have successfully implemented the original DCGAN and modified it to handle one-dimensional vectors. Another specific goal is to implement and test several advancements to DCGAN proposed by \citet{donahue2018adversarial}. These advancements are:
 \begin{itemize}
-  \item Online tutorial on audio synthesis with GANs \citep{pasini2019syngan}
-  \item Related papers on audio synthesis using GANs \citep{donahue2018adversarial, engel2018gansynth}
-  \item Deep learning textbook \citep{lecun2015deep}
-  \item Machine Learning Mastery (this tutorial on GAN latent space interpolation could be helpful for the stretch goal of interpolating between sounds) \citep{brownlee2019ganlatent}
-  \item Original GAN paper \citep{goodfellow2014generative}
-  \item Tutorial on GANs \citep{goodfellow2016nips}
-  \item Additionally, Jordie's supervisor George Tzanetakis will be a valuable resource for questions regarding audio processing
+  \item  \textbf{Inception Score:}  a measurement derived from a pre-trained Inception classifier [insert reference] which can be used to quantitatively measure performance as well as to inform early stopping during training. 
+  \item  \textbf{Phase shuffling:} This is implemented to combat a known effect of GANs to produce artifacts in images, which translates to harmonic distortion in audio signals. Phase shuffling makes the discriminators job more challenging so it can be seen as a type of regularization or penalty during training.
+  \item \textbf{Loss Function:} Improved loss function using the Wasserstein distance, as in \citet{arjovsky2017wasserstein} or \citet{gulrajani2017improved}
 \end{itemize}
 
-\subsection{Stage 2: Implementation}
-\emph{Dates:} July 4 - July 20
+Additionally, we have developed an idea on our own for a variation on the WaveGan model that uses the Mel-Frequency Cepstral Coefficients (MFCCs). This reframes the audio generation problem back into the image generation domain by using a time series of mel-scale frequency bands to create a spectrogram image. Donahue et al. experimented with a similar approach using the Short-time Fourier Transform (STFT). The STFT is linear frequency audio representation, however humans perceive frequency in a logarithmic scale. MFCCs represent audio in the frequency domain using the mel-frequency scale, which is a logarithmic based scale based on human auditory perception. While MFCCs are typically not invertible, there exist approximations allowing for transform to the time-domain. The librosa library contains such an approximation and we would like to experiment with this and compare results to the time-domain based GAN that we are also developing. 
 
-The goal of the implementation stage is to produce a functioning GAN that can generate new instrumental audio after being trained on audio samples from the NSynth dataset. We plan on using TensorFlow\footnote{\url{https://www.tensorflow.org/}} to implement a model similar to the one proposed by \citep{donahue2018adversarial}. Implementation will be broken into four subsections: data preparation, generator implementation, discriminator implementation, and integration. Data preparation will consist of selecting the instruments that we want to use to train the GAN on. We plan on trying several different types of selections such as training using brass sounds only, or training using a combination of different instrumental sounds.
+\section{Plan and progress-to-date}
+In our project proposal we outlined six project stages: research, implementation, objective evaluation, informal subjective evaluation, stretch goal, and the final report. We have completed the research stage and have begun implementation. In the research  stage, we reviewed relevant papers, textbooks, and online tutorials which informed how we started development. Now we are in the second stage, which is the implementation stage. This implementation stage will last for about two weeks, with a goal of finishing on July 20th. To begin our implementation, we started with the original DCGAN that was originally developed for image generation. We modified DCGAN to handle audio signals and trained it on a set of snare drum samples as a test. More details on this initial experiment is provided in the following section and a reporting of the initial results is shown in the last part of this report. 
 
-Our team will split up into two smaller groups to implement the GAN. One team will implement the generator network and another team will implement and train the discriminator network. Once both of these networks are constructed and the discriminator is trained, we will integrate them and train the full GAN network.
+For the following plans, as we mentioned in the proposal, we would like to evaluate the model using objective and subjective methods. If we still have extra time, we will attempt our stretch goal of interpolation between different sounds. In order to track the progress of the project, we hold a Zoom meeting every Friday to share the information we have and discuss our next step. We also share code on our github repository, and use Slack to regularly converse on the project.
+ \emph{Dates:} June 12 - July 10 
+
+So far, we have performed initial research and run an initial test using a modification on the original DCGAN to produce snare drum samples.
+
+Since GANs are a new topic to us, we spent a lot of time doing the initial research and readings. Since we would like every member to gain information and experience from the research stage, in the Friday Zoom meeting, we are sharing information, which we conduct independent research that might be useful to our projects. Additionally, Jordie’s supervisor George Tzanetakis is a valuable resource for questions regarding audio processing. The following list is the resources we have gone through which have been helpful for our project:
+\begin{itemize}
+  \item Online tutorial on audio synthesis with GANs (\citet{pasini2019syngan})
+  \item Related papers on audio synthesis using GANs (\citet{donahue2018adversarial} \citet{engel2018gansynth} )
+  \item  Deep learning textbook (\citet{lecun2015deep})
+  \item Machine Learning Mastery (this tutorial on GAN latent space interpolation could be helpful for the stretch goal of interpolating between sounds (\citet{brownlee2019ganlatent})
+  \item Original GAN paper (\citet{goodfellow2014generative})
+  \item Tutorial on GANs (\citet{goodfellow2016nips})
+\end{itemize}
+
+For the implementation stage we decided to start by implementing the original DCGAN first, which is what Donahue et al. based their model off of. A tutorial in the TensorFlow documentation [footnote to https://www.tensorflow.org/tutorials/generative/dcgan] provided direction for developing this initial model. We modified the DCGAN from this tutorial to handle one dimension audio signals as opposed to images and added additional convolutional layers so the output layer was a size of 16384, corresponding to one second of audio at a sampling rate of 1kHz. We then trained this model on a dataset of about 2200 snare drum samples that Jordie had used for previous research and had readily available. The model was trained over 50 epochs, which took about 2.5 hours on a MacBook Pro
+
+\subsection{FUTURE STAGE: IMPLEMENTATION AND EVALUATION}
+ \emph{Dates:} July 11 - August 1
  
-In addition to experimenting with training with different datasets, we would like to experiment with tuning network hyper-parameters and compare results. The amount that we will be able to do this will depend on how long it will take to train the network, which is an unknown factor to us at this point, although we are anticipating several hours to train each model.
+Our future plan includes the remainder of the implementation stage, evaluation, stretch goals, and our final report. Implementation will last until July 20th, evaluation and stretch goals will last until 27th, and we will then put together our final report. We will briefly outline our plans for each of the stages here. 
+For the next step of the implementation stage, we would like to select and prepare a subset of the NSynth dataset to train our two proposed GANs: the time domain GAN with improvements based on the WaveGan by Donahue et al., and our proposed ‘MFCC-GAN’. The specific improvements mentioned by Donahue et al. that we will be implementing during this stage are: phase shuffling in the discriminator (to eliminate periodic artifacts in the audio); inception scores for evaluation and early stopping; and an improved loss function using the Wasserstein distance. To evaluate our models, we will use the inception score, nearest neighbour metric, and set up a Turing test to distribute among friends and family.
 
-Our main goal is to implement one GAN model, however, if we are ahead of schedule at this point we would like to implement a variation on the GAN proposed by \citep{donahue2018adversarial} by using Mel-Frequency Cepstral Coefficients, which are a type of audio transform that are more perceptually relevant to human hearing and could potentially produce improved results.
-\subsection{Stage 3: Objective Evaluation}
-\emph{Dates:} July 21 - July 27
-
-To objectively measure the quality of our implemented GAN we will use inception score and nearest neighbour evaluation, which was used by \citet{donahue2018adversarial}. Inception score can be used to evaluate whether the sound generated by the generator is close to the real sound \citep{xu2018empirical}. We can calculate the similarity rate or score from this in order to evaluate and optimize our generator.
-
-\subsection{Stage 4: Informal Subjective Evaluation}
-\emph{Dates:} July 21 - July 27
-
-Create a simple \emph{Turing Test} to share with some friends and family as an informal evaluation. In this informal evaluation we will share the audio results generated from our GAN and get subjects to rate the quality.
-
-\subsection{Stage 5: Interpolation (Stretch Goal)}
-\emph{Dates:} July 21 - July 27
-
-Interpolation is a stretch goal that we would like to implement if we have time. The goal of this stage would be to provide a way to interpolate between sounds by linearly moving between two points in the generator latent space. This goal was inspired by image GANs that show smooth interpolation between different faces. Being able to smoothly adjust and move between different sounds would be a useful feature for music producers and sound effect designers. The tutorial by \citet{brownlee2019ganlatent} will be helpful at this stage. 
-
-\subsection{Stage 6: Project Report}
-\emph{Dates:} July 28 - August 1
-
-Wrap up project and document results in the final project report.
-
+Interpolation is a stretch goal that we would like to implement if we have time. The purpose is to provide a way to interpolate between different sound types. This idea is inspired by image GANs which are able to smoothly interpolate between different faces. In audio processing, being able to smoothly adjust and move between different sounds would be a useful feature for music producers and sound effect designers. There is a tutorial by Brownlee (2019) that might be helpful for this goal. After we wrap up the project and document results, we will be able to finish the final project report
 \section{Task Breakdown}
-Table \ref{tasks} highlights the contributions that each member of our team will make towards the completion of our project. The generator and discriminator tasks refer to implementing each of those models using the TensorFlow library. Additionally, for the discriminator task, that will also include training on selected subsets of the NSynth dataset. Preparation of the training material from NSynth is included in the data preparation task. The integration task involves putting the generator and discriminator together and training the generator. The generator will then be evaluated by all group members using two objective methods as well as an informal subjective evaluation.
-% Task breakdown table
-\begin{table}[t]
-\caption{Project Task Breakdown}
-\label{tasks}
-\begin{center}
-\begin{tabular}{|l|c|c|c|c|p{2cm}|}
-\hline 
-\multicolumn{1}{|c|}{\bf}  &\multicolumn{1}{c|}{\bf Generator} &\multicolumn{1}{c|}{\bf Discriminator} &\multicolumn{1}{p{1.75cm}|}{\bf Data\break Preparation} &\multicolumn{1}{c|}{\bf Integration} &\multicolumn{1}{c|}{\bf Evaluation}
-\\ \hline
-Etienne Leclerc   	& &\checkmark &\checkmark &\checkmark & Informal\break Subjective,\break Inception\\ \hline
-Jordie Shier      	& &\checkmark &\checkmark &\checkmark &Informal\break Subjective,\break Inception\\ \hline
-Lu Lu             	&\checkmark & &\checkmark & &Informal\break Subjective\\ \hline
-Yangruirui Wang		& &\checkmark &\checkmark & &Informal\ Subjective,\break Nearest\break Neighbour\\ \hline
-Ziyi Feng			&\checkmark & &\checkmark & &Informal\ Subjective,\break Nearest\break Neighbour\\ \hline
-\end{tabular}
-\end{center}
-\end{table}
+\qquad Tasks that need to be done:
+\begin{itemize}
+  \item Selecting and preparing a subset of the NSynth dataset
+  \item Wasserstein metric
+  \item Inception classifier and inception score
+  \item Setting up a Turing test to distribute
+  \item MFCC GAN
+\end{itemize}
+\qquad Task breakdown:
+\begin{itemize}
+  \item Jordie: project coordinator, the guy with the whip - implementing the MFCC GAN
+  \item Etienne: Wasserstein metric
+  \item Ziyi: Setting up a Turing test and Phase shuffling
+  \item Yangruirui: Nearest neighbour metric
+  \item Lu: Selecting and preparing a subset of the NSynth dataset and Phase shuffling
+\end{itemize}
+\section{Initial Result}
+So far we have implemented a baseline version of our first model, a modified version of DCGAN to handle time-domain audio signals, and trained it on a dataset of 2200 snare drum samples. We have yet to implement the inception score and nearest neighbour metrics to objectively evaluate these results, so we have performed an informal listening evaluation and produced some plots that demonstrate training progress. 
+
+Listening to the results of this baseline model indicate that the GAN is learning to create snare-drum-like sounds. The amplitude envelope is being matched quite accurately, however there is a distinct harmonic noise present that is unnatural sounding. Furthermore, any tonal quality that is present in some snare drums is not being captured; the GAN is basically producing shaped noise. The phase shuffling that was proposed by Donahue et al. will hopefully help to address the harmonic noise in the signal. 
+
+\begin{figure}[H] 
+\centering 
+\includegraphics[width=1.0\textwidth]{image} 
+\caption{Audio Waveform Images on the GAN learning the envelope of the sound}
+\label{Fig.main2}
+\end{figure}
+Figure 1 shows the audio waveforms that the generator produced as the epoch increased from 1 to 50. When epoch is very small, the waveforms look like the noise wave, as it increases, the GAN gradually learns the envelope of the sound.   
+
+To gain insight into how sounds generated by the trained model compare to the pre-trained model as well as the training dataset, we plotted a selection of samples in two dimensions based on sound similarity. To generate this plot, 100 samples were randomly selected from the training set and 100 samples were generated from the pre-trained model and the trained model. To all three classes of audio files, we applied MFCCs (described above). For each frequency band, the mean and standard deviation was calculated. Since the results of MFCC are a 40-feature vector for each audio signal, we decided to use principal component analysis (PCA) to do dimension reduction. We reduce the dimensionality from 40 to 2, so that they can be visualized in a 2D figure. The visualization is shown below. 
+
+\begin{figure}[H] 
+\centering 
+\includegraphics[width=0.7\textwidth]{unnamed} 
+\caption{2D plot of pre-training audio, generated snares audio and  real snare audio}
+\label{Fig.main2}
+\end{figure}
+In figure2, the X-axis is the first principal component and Y-axis is the second principal component. This plot shows how all the sounds from the pre-trained model are clumped together, and then after training have expanded towards the sonic distribution of the training snare drums. 
 
 
 \newpage
