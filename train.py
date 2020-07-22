@@ -37,9 +37,6 @@ def load_dataset(filename):
     return dataset
 
 
-# Define the loss functions to be used for discriminator
-# This should be (fake_loss - real_loss)
-# We will add the gradient penalty later to this loss function
 def discriminator_loss(real_img, fake_img):
     """
     Define the loss functions to be used for discriminator
