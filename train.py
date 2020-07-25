@@ -4,8 +4,10 @@
 Audio GAN training script
 """
 
+import os
 import sys
 import argparse
+import json
 import numpy as np
 import tensorflow as tf
 from wpgan import WPGAN
@@ -58,15 +60,26 @@ def main(arguments):
     parser.add_argument('-e', '--epochs', default=50, help="Training epochs", type=int)
     parser.add_argument('-m', '--model', default="wpgan", help="Model type: {dcgan, wpgan}", type=str)
     parser.add_argument('-o', '--output', default=None, help="If set, save trained model to this file", type=str)
+    parser.add_argument('-s', '--stats', default=None,
+                        help="Save the loss/accuracy stats as JSON to this location", type=str)
 
     args = parser.parse_args(arguments)
     dataset = load_dataset(args.train_data)
 
+    if args.stats and not os.path.exists(os.path.dirname(args.stats)):
+        raise Exception("Directory for train stats location does not exist: {}".format(args.stats))
+
     gan = models[args.model]()
-    gan.train(dataset, args.epochs)
+    history = gan.train(dataset, args.epochs)
 
     if args.output is not None:
         gan.generator.save(args.output)
+
+    print(history)
+
+    if args.stats is not None:
+        with open(args.stats, 'w') as fp:
+            json.dump(history, fp, indent=True)
 
 
 if __name__ == '__main__':

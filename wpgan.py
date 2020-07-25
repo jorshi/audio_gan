@@ -3,7 +3,6 @@
 Class containing code to train the WPGAN
 """
 
-import time
 from tqdm import tqdm
 import tensorflow as tf
 import wave_gan
@@ -21,9 +20,13 @@ class WPGAN:
         self.discriminator = wave_gan.make_discriminator_model()
         self.generator_optimizer = tf.keras.optimizers.Adam(1e-4)
         self.discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
+        self.real_accuracy = tf.keras.metrics.BinaryAccuracy()
+        self.fake_accuracy = tf.keras.metrics.BinaryAccuracy()
         self.history = {
             "disc_loss": list(),
-            "gen_loss": list()
+            "gen_loss": list(),
+            "disc_real_accuracy": list(),
+            "disc_fake_accuracy": list()
         }
 
     @staticmethod
@@ -93,7 +96,8 @@ class WPGAN:
 
     @staticmethod
     @tf.function
-    def train_step(samples, generator, discriminator, generator_optimizer, discriminator_optimizer):
+    def train_step(samples, generator, discriminator, generator_optimizer, discriminator_optimizer,
+                   real_accuracy, fake_accuracy):
         """
         Update model weights on a single batch
 
@@ -103,19 +107,21 @@ class WPGAN:
             discriminator: the discriminator model
             generator_optimizer: optimizer used for the generator
             discriminator_optimizer: optimizer used for the discriminator
+            real_accuracy: binary accuracy metric for real samples
+            fake_accuracy: binary accuracy metric for fake samples from generator
         """
 
         gp_weight = 10.0
         disc_steps = 4
 
-        d_loss = float()
+        d_loss = list()
 
         # Train discriminator
         for i in range(disc_steps):
             noise = tf.random.normal([len(samples), WPGAN.LATENT_SIZE])
             with tf.GradientTape() as disc_tape:
+                # Generate samples and get results from discriminator
                 generated_samples = generator(noise, training=True)
-
                 real_output = discriminator(samples, training=True)
                 fake_output = discriminator(generated_samples, training=True)
 
@@ -126,7 +132,15 @@ class WPGAN:
 
                 # Weighted sum of losses
                 total_loss = disc_loss + gp_weight * gp
-                d_loss = float(total_loss)
+                d_loss.append(float(total_loss))
+
+                # Convert logits output from discriminator to prediction between 0 and 1
+                real_pred = tf.round(tf.nn.sigmoid(real_output))
+                fake_pred = tf.round(tf.nn.sigmoid(fake_output))
+
+                # Calculate accuracy of predictions for real and fake outputs from discriminator
+                real_accuracy.update_state(tf.ones_like(real_output), real_pred)
+                fake_accuracy.update_state(tf.zeros_like(fake_output), fake_pred)
 
             gradients_of_discriminator = disc_tape.gradient(total_loss, discriminator.trainable_variables)
 
@@ -137,16 +151,14 @@ class WPGAN:
 
         with tf.GradientTape() as gen_tape:
             generated_samples = generator(noise, training=True)
-
-            real_output = discriminator(samples, training=True)
             fake_output = discriminator(generated_samples, training=True)
-
             gen_loss = WPGAN.generator_loss(fake_output)
 
         gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
         generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
 
-        return d_loss, float(gen_loss)
+        disc_loss = sum(d_loss) / disc_steps
+        return disc_loss, float(gen_loss)
 
     def train(self, dataset, epochs):
         """
@@ -158,14 +170,36 @@ class WPGAN:
         """
 
         for epoch in range(epochs):
-            start = time.time()
+            disc_loss, gen_loss = list(), list()
 
             for audio_batch in tqdm(dataset):
-                disc_loss, gen_loss = WPGAN.train_step(audio_batch, self.generator, self.discriminator,
-                                                       self.generator_optimizer, self.discriminator_optimizer)
+                d_loss, g_loss = WPGAN.train_step(audio_batch, self.generator, self.discriminator,
+                                                  self.generator_optimizer, self.discriminator_optimizer,
+                                                  self.real_accuracy, self.fake_accuracy)
 
-            print("Epoch {}, Discriminator Loss: {}, Generator Loss: {}".format(epoch, disc_loss, gen_loss))
-            self.history["disc_loss"].append(disc_loss)
-            self.history["gen_loss"].append(gen_loss)
+                # Save the batch loss for generator and discriminator
+                disc_loss.append(d_loss)
+                gen_loss.append(g_loss)
+
+            # Get accuracy scores for this epoch
+            r_accuracy = self.real_accuracy.result()
+            f_accuracy = self.fake_accuracy.result()
+
+            # Average loss values
+            d_loss = sum(disc_loss) / len(audio_batch)
+            g_loss = sum(gen_loss) / len(audio_batch)
+
+            print("Epoch {}, Discriminator Loss: {}, Generator Loss: {}".format(epoch, d_loss, g_loss))
+            print("Epoch {}, Real accuracy: {}, Fake accuracy: {}".format(epoch, r_accuracy, f_accuracy))
+
+            # Store loss and accuracy in history dictionary
+            self.history["disc_loss"].append(float(d_loss))
+            self.history["gen_loss"].append(float(g_loss))
+            self.history["disc_real_accuracy"].append(float(r_accuracy))
+            self.history["disc_fake_accuracy"].append(float(f_accuracy))
+
+            # Reset accuracy scores for next epoch
+            self.real_accuracy.reset_states()
+            self.fake_accuracy.reset_states()
 
         return self.history
