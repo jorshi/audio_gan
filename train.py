@@ -62,6 +62,9 @@ def main(arguments):
     parser.add_argument('-o', '--output', default=None, help="If set, save trained model to this file", type=str)
     parser.add_argument('-s', '--stats', default=None,
                         help="Save the loss/accuracy stats as JSON to this location", type=str)
+    parser.add_argument('--ckpt_dir', default="training_checkpoints", help="Directory for training checkpoints", type=str)
+    parser.add_argument('--ckpt_prefix', default=None, help="File prefix for checkpoint files", type=str)
+    parser.add_argument('--ckpt_freq', default=0, help="How often to save checkpoints", type=int)
 
     args = parser.parse_args(arguments)
     dataset = load_dataset(args.train_data)
@@ -69,14 +72,22 @@ def main(arguments):
     if args.stats and not os.path.exists(os.path.dirname(args.stats)):
         raise Exception("Directory for train stats location does not exist: {}".format(args.stats))
 
-    gan = models[args.model]()
+    kwargs = {
+        'checkpoint_dir': args.ckpt_dir,
+        'checkpoint_freq': args.ckpt_freq
+    }
+
+    if args.ckpt_prefix:
+        kwargs['checkpoint_prefix'] = args.ckpt_prefix
+
+    gan = models[args.model](**kwargs)
     history = gan.train(dataset, args.epochs)
 
+    # Save the model
     if args.output is not None:
         gan.generator.save(args.output)
 
-    print(history)
-
+    # Save the training history
     if args.stats is not None:
         with open(args.stats, 'w') as fp:
             json.dump(history, fp, indent=True)

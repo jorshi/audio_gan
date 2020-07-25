@@ -3,6 +3,7 @@
 Class containing code to train the WPGAN
 """
 
+import os
 from tqdm import tqdm
 import tensorflow as tf
 import wave_gan
@@ -12,7 +13,7 @@ class WPGAN:
 
     LATENT_SIZE = 100
 
-    def __init__(self):
+    def __init__(self, checkpoint_dir="./train_checkpoints", checkpoint_prefix="wpgan_ckpt", checkpoint_freq=0):
         """
         Constructor
         """
@@ -28,6 +29,12 @@ class WPGAN:
             "disc_real_accuracy": list(),
             "disc_fake_accuracy": list()
         }
+        self.checkpoint_prefix = os.path.join(checkpoint_dir, checkpoint_prefix)
+        self.checkpoint_frequency = checkpoint_freq
+        self.checkpoint = tf.train.Checkpoint(generator_optimizer=self.generator_optimizer,
+                                              discriminator_optimizer=self.discriminator_optimizer,
+                                              generator=self.generator,
+                                              discriminator=self.discriminator)
 
     @staticmethod
     def discriminator_loss(real_img, fake_img):
@@ -201,5 +208,9 @@ class WPGAN:
             # Reset accuracy scores for next epoch
             self.real_accuracy.reset_states()
             self.fake_accuracy.reset_states()
+
+            # Save a checkpoint
+            if self.checkpoint_frequency and (epoch + 1) % self.checkpoint_frequency == 0:
+                self.checkpoint.save(file_prefix=self.checkpoint_prefix)
 
         return self.history
