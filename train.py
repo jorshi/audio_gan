@@ -118,6 +118,8 @@ def train_step(samples, generator, discriminator, generator_optimizer, discrimin
     gp_weight = 10.0
     disc_steps = 4
 
+    d_loss = float()
+
     # Train discriminator
     for i in range(disc_steps):
         noise = tf.random.normal([len(samples), wave_gan.LATENT_SIZE])
@@ -134,6 +136,7 @@ def train_step(samples, generator, discriminator, generator_optimizer, discrimin
 
             # Weighted sum of losses
             total_loss = disc_loss + gp_weight * gp
+            d_loss = total_loss
 
         gradients_of_discriminator = disc_tape.gradient(total_loss, discriminator.trainable_variables)
 
@@ -153,6 +156,8 @@ def train_step(samples, generator, discriminator, generator_optimizer, discrimin
     gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
 
+    return d_loss, gen_loss
+
 
 def train(dataset, epochs, output):
     """
@@ -170,16 +175,28 @@ def train(dataset, epochs, output):
     generator_optimizer = tf.keras.optimizers.Adam(1e-4)
     discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
+    # Lists for storing loss history over training epochs
+    history = {
+        "disc_loss": list(),
+        "gen_loss": list()
+    }
+
     for epoch in range(epochs):
         start = time.time()
 
         for audio_batch in tqdm(dataset):
-            train_step(audio_batch, generator, discriminator,
-                       generator_optimizer, discriminator_optimizer)
+            disc_loss, gen_loss = train_step(audio_batch, generator, discriminator,
+                                             generator_optimizer, discriminator_optimizer)
+
+        print("Epoch {}, Discriminator Loss: {}, Generator Loss: {}".format(epoch, disc_loss, gen_loss))
+        history["disc_loss"].append(disc_loss)
+        history["gen_loss"].append(gen_loss)
 
     if output is not None:
         print("Saving model as {}".format(output))
         generator.save(output)
+
+    return history
 
 
 def main(arguments):
