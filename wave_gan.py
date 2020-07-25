@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Functions for creating the WaveGan generator and discriminator, based on Donahue et al.
 """
@@ -6,16 +6,14 @@ Functions for creating the WaveGan generator and discriminator, based on Donahue
 import tensorflow as tf
 from tensorflow.keras import layers
 
-LATENT_SIZE = 100
 
-
-def make_generator_model():
+def make_generator_model(latent_size):
     """
     Create the WaveGAN generator
     :return: Sequential Model
     """
     model = tf.keras.Sequential()
-    model.add(layers.Dense(16 * 1024, use_bias=False, input_shape=(LATENT_SIZE,)))
+    model.add(layers.Dense(16 * 1024, use_bias=False, input_shape=(latent_size,)))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
