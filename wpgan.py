@@ -167,13 +167,14 @@ class WPGAN:
         disc_loss = sum(d_loss) / disc_steps
         return disc_loss, float(gen_loss)
 
-    def train(self, dataset, epochs):
+    def train(self, dataset, epochs, callbacks=None):
         """
         The training loop
 
         Args:
             dataset (tf.Dataset): the dataset to run training on
             epochs (int): number of training epochs to run
+            callbacks (list): A list functions to call after each epoch
         """
 
         for epoch in range(epochs):
@@ -212,5 +213,10 @@ class WPGAN:
             # Save a checkpoint
             if self.checkpoint_frequency and (epoch + 1) % self.checkpoint_frequency == 0:
                 self.checkpoint.save(file_prefix=self.checkpoint_prefix)
+
+            # Call callback functions
+            if callbacks is not None:
+                for callback in callbacks:
+                    callback(self, epoch)
 
         return self.history

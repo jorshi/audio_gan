@@ -8,12 +8,15 @@ import os
 import sys
 import argparse
 import json
+from functools import partial
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from wpgan import WPGAN
 from dcgan import DCGAN
 
 BATCH_SIZE = 64
+NUM_IMAGES = 4
 
 # Possible models to train
 models = {
@@ -44,6 +47,19 @@ def load_dataset(filename):
     return dataset
 
 
+def save_images(test_batch, image_dir, image_prefix, model, epoch):
+
+    predictions = model.generator(test_batch, training=False)
+    fig = plt.figure(figsize=(2, 2))
+    for i in range(predictions.shape[0]):
+        plt.subplot(2, 2, i+1)
+        plt.plot(predictions[i, :, 0])
+        plt.axis('off')
+
+    filename = os.path.join(image_dir, '{}_image_at_epoch_{:04d}.png'.format(image_prefix, epoch))
+    plt.savefig(filename, dpi=150)
+
+
 def main(arguments):
     """
     Script entry point
@@ -65,6 +81,9 @@ def main(arguments):
     parser.add_argument('--ckpt_dir', default="training_checkpoints", help="Directory for training checkpoints", type=str)
     parser.add_argument('--ckpt_prefix', default=None, help="File prefix for checkpoint files", type=str)
     parser.add_argument('--ckpt_freq', default=0, help="How often to save checkpoints", type=int)
+    parser.add_argument('--image_dir', default="training_images", help="Directory to save training images", type=str)
+    parser.add_argument('--image_prefix', default=None,
+                        help="File prefix to save image files (must be set to save images)", type=str)
 
     args = parser.parse_args(arguments)
     dataset = load_dataset(args.train_data)
@@ -72,6 +91,7 @@ def main(arguments):
     if args.stats and not os.path.exists(os.path.dirname(args.stats)):
         raise Exception("Directory for train stats location does not exist: {}".format(args.stats))
 
+    # Create model parameters
     kwargs = {
         'checkpoint_dir': args.ckpt_dir,
         'checkpoint_freq': args.ckpt_freq
@@ -80,8 +100,22 @@ def main(arguments):
     if args.ckpt_prefix:
         kwargs['checkpoint_prefix'] = args.ckpt_prefix
 
+    # Create the model from the argument
     gan = models[args.model](**kwargs)
-    history = gan.train(dataset, args.epochs)
+
+    # Setup the callback to save images after each epoch
+    callbacks = []
+    if args.image_prefix is not None:
+        if not os.path.exists(args.image_dir):
+            os.makedirs(args.image_dir)
+
+        # Create a latent space seed to share across images
+        seed = tf.random.normal([NUM_IMAGES, gan.LATENT_SIZE])
+        image_callback = partial(save_images, seed, args.image_dir, args.image_prefix)
+        callbacks.append(image_callback)
+
+    # Train the model
+    history = gan.train(dataset, args.epochs, callbacks=callbacks)
 
     # Save the model
     if args.output is not None:
