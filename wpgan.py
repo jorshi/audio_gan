@@ -18,7 +18,7 @@ class WPGAN:
         Constructor
         """
         self.generator = wave_gan.make_generator_model(WPGAN.LATENT_SIZE)
-        self.discriminator = wave_gan.make_discriminator_model()
+        self.discriminator = wave_gan.make_discriminator_model(normalization="layer")
         self.generator_optimizer = tf.keras.optimizers.Adam(1e-4)
         self.discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
         self.real_accuracy = tf.keras.metrics.BinaryAccuracy()
