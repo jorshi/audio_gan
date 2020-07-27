@@ -8,6 +8,7 @@ from tqdm import tqdm
 import tensorflow as tf
 import wave_gan
 import wave_gan_upsample
+import wave_gan_resize
 
 
 class WPGAN:
@@ -15,14 +16,17 @@ class WPGAN:
     LATENT_SIZE = 100
 
     def __init__(self, checkpoint_dir="./train_checkpoints", checkpoint_prefix="wpgan_ckpt", checkpoint_freq=0,
-                 upsample=False):
+                 upsample=None):
         """
         Constructor
         """
 
-        if upsample:
+        if upsample == "upsample":
             self.generator = wave_gan_upsample.make_generator_model(WPGAN.LATENT_SIZE)
             self.discriminator = wave_gan_upsample.make_discriminator_model()
+        elif upsample == "resize":
+            self.generator = wave_gan_resize.make_generator_model(WPGAN.LATENT_SIZE)
+            self.discriminator = wave_gan_resize.make_discriminator_model()
         else:
             self.generator = wave_gan.make_generator_model(WPGAN.LATENT_SIZE)
             self.discriminator = wave_gan.make_discriminator_model(normalization=None)
@@ -43,6 +47,8 @@ class WPGAN:
                                               discriminator_optimizer=self.discriminator_optimizer,
                                               generator=self.generator,
                                               discriminator=self.discriminator)
+
+        print(self.generator.summary())
 
     @staticmethod
     def discriminator_loss(real_img, fake_img):

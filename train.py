@@ -81,12 +81,14 @@ def main(arguments):
     parser.add_argument('-s', '--stats', default=None,
                         help="Save the loss/accuracy stats as JSON to this location", type=str)
     parser.add_argument('--ckpt_dir', default="training_checkpoints", help="Directory for training checkpoints", type=str)
-    parser.add_argument('--ckpt_prefix', default=None, help="File prefix for checkpoint files", type=str)
+    parser.add_argument('--ckpt_prefix', default="checkpoint", help="File prefix for checkpoint files", type=str)
     parser.add_argument('--ckpt_freq', default=0, help="How often to save checkpoints", type=int)
     parser.add_argument('--image_dir', default="training_images", help="Directory to save training images", type=str)
     parser.add_argument('--image_prefix', default=None,
                         help="File prefix to save image files (must be set to save images)", type=str)
-    parser.add_argument('-u', '--upsample', dest='upsample', action='store_const', const=True, default=False)
+    parser.add_argument('-u', '--upsample',
+                        help="Generator upsample type: can set to resize or upsample, default is None",
+                        default=None, type=str)
 
     args = parser.parse_args(arguments)
     dataset = load_dataset(args.train_data, args.batch)
