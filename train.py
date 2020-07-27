@@ -86,6 +86,7 @@ def main(arguments):
     parser.add_argument('--image_dir', default="training_images", help="Directory to save training images", type=str)
     parser.add_argument('--image_prefix', default=None,
                         help="File prefix to save image files (must be set to save images)", type=str)
+    parser.add_argument('-u', '--upsample', dest='upsample', action='store_const', const=True, default=False)
 
     args = parser.parse_args(arguments)
     dataset = load_dataset(args.train_data, args.batch)
@@ -96,7 +97,8 @@ def main(arguments):
     # Create model parameters
     kwargs = {
         'checkpoint_dir': args.ckpt_dir,
-        'checkpoint_freq': args.ckpt_freq
+        'checkpoint_freq': args.ckpt_freq,
+        'upsample': args.upsample
     }
 
     if args.ckpt_prefix:
