@@ -12,6 +12,7 @@ def make_generator_model(latent_size, normalization=True):
     Create the WaveGAN generator
     :return: Sequential Model
     """
+
     model = tf.keras.Sequential()
     model.add(layers.Dense(16 * 1024, use_bias=False, input_shape=(latent_size,)))
     if normalization:
