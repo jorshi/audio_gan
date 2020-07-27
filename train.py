@@ -25,12 +25,13 @@ models = {
 }
 
 
-def load_dataset(filename):
+def load_dataset(filename, batch_size):
     """
     Load numpy object and convert to a TensorFlow dataset
 
     Args:
         filename (str): Location of numpy file
+        batch_size (int): Size for each batch
 
     Returns:
         tf.Dataset
@@ -43,7 +44,7 @@ def load_dataset(filename):
     peak = max(abs(data.max()), abs(data.min()))
     data /= peak
 
-    dataset = tf.data.Dataset.from_tensor_slices(data).shuffle(len(data)).batch(BATCH_SIZE)
+    dataset = tf.data.Dataset.from_tensor_slices(data).shuffle(len(data)).batch(batch_size)
     return dataset
 
 
@@ -73,6 +74,7 @@ def main(arguments):
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('train_data', help="Location of .npy training data", type=str)
+    parser.add_argument('-b', '--batch', default=64, help="Batch size", type=int)
     parser.add_argument('-e', '--epochs', default=50, help="Training epochs", type=int)
     parser.add_argument('-m', '--model', default="wpgan", help="Model type: {dcgan, wpgan}", type=str)
     parser.add_argument('-o', '--output', default=None, help="If set, save trained model to this file", type=str)
@@ -86,7 +88,7 @@ def main(arguments):
                         help="File prefix to save image files (must be set to save images)", type=str)
 
     args = parser.parse_args(arguments)
-    dataset = load_dataset(args.train_data)
+    dataset = load_dataset(args.train_data, args.batch)
 
     if args.stats and not os.path.exists(os.path.dirname(args.stats)):
         raise Exception("Directory for train stats location does not exist: {}".format(args.stats))

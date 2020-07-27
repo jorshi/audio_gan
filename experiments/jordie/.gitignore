@@ -2,3 +2,4 @@ drum_data/*
 training_checkpoints_audio_gan/*
 *.npy
 *.h5
+*.wav
