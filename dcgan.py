@@ -7,7 +7,6 @@ import os
 from tqdm import tqdm
 import tensorflow as tf
 import wave_gan
-import wave_gan_upsample
 
 
 class DCGAN:
@@ -15,19 +14,10 @@ class DCGAN:
     LATENT_SIZE = 100
     cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
-    def __init__(self, checkpoint_dir="./train_checkpoints", checkpoint_prefix="dcgan_ckpt", checkpoint_freq=0,
-                 upsample=False):
+    def __init__(self, checkpoint_dir="./train_checkpoints", checkpoint_prefix="dcgan_ckpt", checkpoint_freq=0):
         """
         Constructor
         """
-
-        if upsample:
-            self.generator = wave_gan_upsample.make_generator_model(WPGAN.LATENT_SIZE)
-            self.discriminator = wave_gan_upsample.make_discriminator_model()
-        else:
-            self.generator = wave_gan.make_generator_model(WPGAN.LATENT_SIZE)
-            self.discriminator = wave_gan.make_discriminator_model(normalization=None)
-
         self.generator = wave_gan.make_generator_model(DCGAN.LATENT_SIZE)
         self.discriminator = wave_gan.make_discriminator_model()
         self.generator_optimizer = tf.keras.optimizers.Adam(1e-4)
