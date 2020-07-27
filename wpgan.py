@@ -6,7 +6,7 @@ Class containing code to train the WPGAN
 import os
 from tqdm import tqdm
 import tensorflow as tf
-import wave_gan
+import wave_gan_2
 
 
 class WPGAN:
