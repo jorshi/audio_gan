@@ -3,6 +3,7 @@ training_history/*
 train_scripts/*
 train_checkpoints/*
 *.bat
+*.wav
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
