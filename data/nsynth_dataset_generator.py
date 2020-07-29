@@ -14,7 +14,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def extract_data_subset(metadata, families, sources, folder):
+def extract_data_subset(metadata, families, sources, pitches, folder):
     """
     Look through the dataset metadata file and compile a list of audio files to
     include in this dataset.
@@ -24,18 +24,28 @@ def extract_data_subset(metadata, families, sources, folder):
         families (list): a list of ids of instrument families to use
         sources (list): a list of ids of instrument sources to use
         folder (str): location of the NSynth folder
+        pitches (list): set of pitches to include, if None then all pitches
 
     Returns:
         list: a list of audio filenames for this subset of NSynth
     """
 
     audio_files = []
+    seen_pitches = {}
     for key in metadata:
-        if metadata[key]['instrument_family'] in families and metadata[key]['instrument_source'] in sources:
+        if metadata[key]['instrument_family'] in families and metadata[key]['instrument_source'] in sources\
+                and (pitches is None or metadata[key]['pitch'] in pitches):
+
             filename = "{}.wav".format(key)
             audio_files.append(os.path.join(folder, "audio", filename))
 
-    return audio_files
+            pitch = metadata[key]['pitch']
+            if pitch in seen_pitches:
+                seen_pitches[pitch] += 1
+            else:
+                seen_pitches[pitch] = 1
+
+    return audio_files, seen_pitches
 
 
 def extract_audio(audio_files, length=16384, sr=16000):
@@ -103,7 +113,9 @@ def main(arguments):
     parser.add_argument('output', help="Filename for numpy dataset output", type=str)
     parser.add_argument('-f', '--family', nargs='+', help="List of instrument family ids", default=[], type=int)
     parser.add_argument('-s', '--source', nargs='+', help="List of instrument source ids", default=[], type=int)
+    parser.add_argument('-p', '--pitch', nargs='+', help="List of pitches", default=None, type=int)
     parser.add_argument('-m', '--mel', dest='extraction', action='store_const', const='mel', default='time')
+    parser.add_argument('--note_freq', action='store_const', const=True, default=False)
 
     args = parser.parse_args(arguments)
 
@@ -119,7 +131,12 @@ def main(arguments):
         metadata = json.load(fp)
 
     print("Compiling audio files from NSynth metadata")
-    audio_files = extract_data_subset(metadata, args.family, args.source, args.nsynth_folder)
+    audio_files, pitches = extract_data_subset(metadata, args.family, args.source, args.pitch, args.nsynth_folder)
+
+    if args.note_freq:
+        sorted_pitches = sorted(pitches.items(), key=lambda x: x[1])
+        print(sorted_pitches)
+        return
 
     if args.extraction == 'mel':
         print('Extracting audio files and creating mel spectrograms')
