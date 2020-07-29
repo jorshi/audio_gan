@@ -59,6 +59,7 @@ def save_images(test_batch, image_dir, image_prefix, model, epoch):
 
     filename = os.path.join(image_dir, '{}_image_at_epoch_{:04d}.png'.format(image_prefix, epoch))
     plt.savefig(filename, dpi=150)
+    plt.close(fig)
 
 
 def main(arguments):
@@ -89,6 +90,8 @@ def main(arguments):
     parser.add_argument('-u', '--upsample',
                         help="Generator upsample type: can set to resize or upsample, default is None",
                         default=None, type=str)
+    parser.add_argument('-r', '--resume', help="Resume training from checkpoint",
+                        action='store_const', const=True, default=False)
 
     args = parser.parse_args(arguments)
     dataset = load_dataset(args.train_data, args.batch)
@@ -108,6 +111,9 @@ def main(arguments):
 
     # Create the model from the argument
     gan = models[args.model](**kwargs)
+
+    if args.resume:
+        gan.load_from_checkpoint(args.ckpt_dir)
 
     # Setup the callback to save images after each epoch
     callbacks = []

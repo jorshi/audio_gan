@@ -47,6 +47,12 @@ class DCGAN:
                                               generator=self.generator,
                                               discriminator=self.discriminator)
 
+    def load_from_checkpoint(self, checkpoint_dir):
+        """
+        Reload model from checkpoint
+        """
+        self.checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
+
     @staticmethod
     def discriminator_loss(real, fake):
         """

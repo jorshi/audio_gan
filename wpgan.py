@@ -48,7 +48,11 @@ class WPGAN:
                                               generator=self.generator,
                                               discriminator=self.discriminator)
 
-        print(self.generator.summary())
+    def load_from_checkpoint(self, checkpoint_dir):
+        """
+        Reload model from checkpoint
+        """
+        self.checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 
     @staticmethod
     def discriminator_loss(real_img, fake_img):
@@ -156,8 +160,8 @@ class WPGAN:
                 d_loss.append(float(total_loss))
 
                 # Convert logits output from discriminator to prediction between 0 and 1
-                real_pred = tf.round(tf.nn.sigmoid(real_output))
-                fake_pred = tf.round(tf.nn.sigmoid(fake_output))
+                real_pred = tf.nn.sigmoid(real_output)
+                fake_pred = tf.nn.sigmoid(fake_output)
 
                 # Calculate accuracy of predictions for real and fake outputs from discriminator
                 real_accuracy.update_state(tf.ones_like(real_output), real_pred)
