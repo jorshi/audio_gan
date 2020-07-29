@@ -7,15 +7,14 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.python.framework import tensor_shape
 from tensorflow.python.keras.engine.input_spec import InputSpec
-from tensorflow.python.ops import array_ops
-from tensorflow.python.keras import backend
 
 
 class Resize(tf.keras.layers.Layer):
-    def __init__(self, size=2, **kwargs):
+    def __init__(self, size=2, method=tf.image.ResizeMethod.BILINEAR, **kwargs):
         super(Resize, self).__init__(**kwargs)
         self.size = int(size)
         self.input_spec = InputSpec(ndim=3)
+        self.method = method
 
     def compute_output_shape(self, input_shape):
         input_shape = tensor_shape.TensorShape(input_shape).as_list()
@@ -24,9 +23,9 @@ class Resize(tf.keras.layers.Layer):
 
     def call(self, inputs):
         x_shape = inputs.shape.as_list()
-        image = tf.reshape(inputs, [-1, x_shape[1], x_shape[2], 1])
-        image = tf.image.resize(image, [x_shape[1]*self.size, x_shape[2]])
-        output = tf.reshape(image, [-1, x_shape[1] * self.size, x_shape[2]])
+        image = tf.reshape(inputs, (-1, x_shape[1], x_shape[2], 1))
+        image = tf.image.resize(image, (x_shape[1]*self.size, x_shape[2]), method=self.method)
+        output = tf.reshape(image, (-1, x_shape[1] * self.size, x_shape[2]))
         return output
 
     def get_config(self):
