@@ -92,6 +92,9 @@ def main(arguments):
                         default=None, type=str)
     parser.add_argument('-r', '--resume', help="Resume training from checkpoint",
                         action='store_const', const=True, default=False)
+    parser.add_argument('--no_norm', dest='batch_norm', help="Turn off generator batch normalization",
+                        action='store_const', const=False, default=True)
+
 
     args = parser.parse_args(arguments)
     dataset = load_dataset(args.train_data, args.batch)
@@ -103,7 +106,8 @@ def main(arguments):
     kwargs = {
         'checkpoint_dir': args.ckpt_dir,
         'checkpoint_freq': args.ckpt_freq,
-        'upsample': args.upsample
+        'upsample': args.upsample,
+        'batch_norm': args.batch_norm
     }
 
     if args.ckpt_prefix:

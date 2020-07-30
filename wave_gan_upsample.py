@@ -8,14 +8,15 @@ from tensorflow.keras import layers
 #from keras.backend import tf as ktf
 
 
-def make_generator_model(latent_size):
+def make_generator_model(latent_size, normalization=True):
     """
     Create the WaveGAN generator
     :return: Sequential Model
     """
     model = tf.keras.Sequential()
     model.add(layers.Dense(16 * 1024, use_bias=False, input_shape=(latent_size,)))
-    model.add(layers.BatchNormalization())
+    if normalization:
+        model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
     model.add(layers.Reshape((16, 1024)))
@@ -24,25 +25,29 @@ def make_generator_model(latent_size):
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(512, 25, strides=1, padding='same', use_bias=False))
     assert model.output_shape == (None, 64, 512)
-    model.add(layers.BatchNormalization())
+    if normalization:
+        model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(256, 25, strides=1, padding='same', use_bias=False))
     assert model.output_shape == (None, 256, 256)
-    model.add(layers.BatchNormalization())
+    if normalization:
+        model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(128, 25, strides=1, padding='same', use_bias=False))
     assert model.output_shape == (None, 1024, 128)
-    model.add(layers.BatchNormalization())
+    if normalization:
+        model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(64, 25, strides=1, padding='same', use_bias=False))
     assert model.output_shape == (None, 4096, 64)
-    model.add(layers.BatchNormalization())
+    if normalization:
+        model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
     model.add(layers.UpSampling1D(size=4))
