@@ -74,27 +74,27 @@ def make_discriminator_model():
     """
     model = tf.keras.Sequential()
 
-    model.add(layers.Conv1D(64, 5, 4, padding='same', input_shape=[16384, 1]))
+    model.add(layers.Conv1D(64, 25, 4, padding='same', input_shape=[16384, 1]))
     assert (model.output_shape == (None, 4096, 64))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(128, 5, 4, padding='same'))
+    model.add(layers.Conv1D(128, 25, 4, padding='same'))
     assert (model.output_shape == (None, 1024, 128))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(256, 5, 4, padding='same'))
+    model.add(layers.Conv1D(256, 25, 4, padding='same'))
     assert (model.output_shape == (None, 256, 256))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(512, 5, 4, padding='same'))
+    model.add(layers.Conv1D(512, 25, 4, padding='same'))
     assert (model.output_shape == (None, 64, 512))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(1024, 5, 4, padding='same'))
+    model.add(layers.Conv1D(1024, 25, 4, padding='same'))
     assert (model.output_shape == (None, 16, 1024))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))

@@ -7,9 +7,11 @@ import os
 import numpy as np
 from tqdm import tqdm
 import tensorflow as tf
+from tensorflow.python.framework import tensor_shape
 import wave_gan
 import wave_gan_upsample
 import wave_gan_resize
+import mel_gan_resize
 
 
 class WPGAN:
@@ -17,37 +19,63 @@ class WPGAN:
     LATENT_SIZE = 100
 
     def __init__(self, checkpoint_dir="./train_checkpoints", checkpoint_prefix="wpgan_ckpt", checkpoint_freq=0,
-                 upsample=None, batch_norm=True, dropout=0.0):
+                 upsample=None, batch_norm=True, dropout=0.0, model="wave"):
         """
         Constructor
         """
 
-        if upsample == "upsample":
-            self.generator = wave_gan_upsample.make_generator_model(WPGAN.LATENT_SIZE,
-                                                                    normalization=batch_norm,
-                                                                    dropout=dropout)
-            self.discriminator = wave_gan_upsample.make_discriminator_model()
-        elif upsample == 'nearest':
-            self.generator = wave_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
-                                                                  method=tf.image.ResizeMethod.NEAREST_NEIGHBOR,
-                                                                  normalization=batch_norm,
-                                                                  dropout=dropout)
-            self.discriminator = wave_gan_resize.make_discriminator_model()
-        elif upsample == 'linear':
-            self.generator = wave_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
-                                                                  method=tf.image.ResizeMethod.BILINEAR,
-                                                                  normalization=batch_norm,
-                                                                  dropout=dropout)
-            self.discriminator = wave_gan_resize.make_discriminator_model()
-        elif upsample == 'cubic':
-            self.generator = wave_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
-                                                                  method=tf.image.ResizeMethod.BICUBIC,
-                                                                  normalization=batch_norm,
-                                                                  dropout=dropout)
-            self.discriminator = wave_gan_resize.make_discriminator_model()
+        if model == "wave":
+            if upsample == "upsample":
+                self.generator = wave_gan_upsample.make_generator_model(WPGAN.LATENT_SIZE,
+                                                                        normalization=batch_norm,
+                                                                        dropout=dropout)
+                self.discriminator = wave_gan_upsample.make_discriminator_model()
+            elif upsample == 'nearest':
+                self.generator = wave_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
+                                                                      method=tf.image.ResizeMethod.NEAREST_NEIGHBOR,
+                                                                      normalization=batch_norm,
+                                                                      dropout=dropout)
+                self.discriminator = wave_gan_resize.make_discriminator_model()
+            elif upsample == 'linear':
+                self.generator = wave_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
+                                                                      method=tf.image.ResizeMethod.BILINEAR,
+                                                                      normalization=batch_norm,
+                                                                      dropout=dropout)
+                self.discriminator = wave_gan_resize.make_discriminator_model()
+            elif upsample == 'cubic':
+                self.generator = wave_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
+                                                                      method=tf.image.ResizeMethod.BICUBIC,
+                                                                      normalization=batch_norm,
+                                                                      dropout=dropout)
+                self.discriminator = wave_gan_resize.make_discriminator_model()
+            else:
+                self.generator = wave_gan.make_generator_model(WPGAN.LATENT_SIZE, normalization=batch_norm)
+                self.discriminator = wave_gan.make_discriminator_model(normalization=None, dropout=dropout)
+
+        elif model == "mel":
+            if upsample == 'nearest':
+                self.generator = mel_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
+                                                                     method=tf.image.ResizeMethod.NEAREST_NEIGHBOR,
+                                                                     normalization=batch_norm,
+                                                                     dropout=dropout)
+                self.discriminator = mel_gan_resize.make_discriminator_model()
+            elif upsample == 'linear':
+                self.generator = mel_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
+                                                                     method=tf.image.ResizeMethod.BILINEAR,
+                                                                     normalization=batch_norm,
+                                                                     dropout=dropout)
+                self.discriminator = mel_gan_resize.make_discriminator_model()
+            elif upsample == 'cubic':
+                self.generator = mel_gan_resize.make_generator_model(WPGAN.LATENT_SIZE,
+                                                                     method=tf.image.ResizeMethod.BICUBIC,
+                                                                     normalization=batch_norm,
+                                                                     dropout=dropout)
+                self.discriminator = mel_gan_resize.make_discriminator_model()
+            else:
+                raise NotImplementedError
+
         else:
-            self.generator = wave_gan.make_generator_model(WPGAN.LATENT_SIZE, normalization=batch_norm)
-            self.discriminator = wave_gan.make_discriminator_model(normalization=None, dropout=dropout)
+            raise NotImplementedError
 
         self.generator_optimizer = tf.keras.optimizers.Adam(1e-4)
         self.discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
@@ -107,8 +135,8 @@ class WPGAN:
         """
         return -tf.reduce_mean(fake_img)
 
+    # @tf.function this is faster without the tf.function for some reason?
     @staticmethod
-    @tf.function
     def gradient_penalty(discriminator, batch_size, real_sounds, fake_sounds):
         """
         This is the innovation provided by the WP-GAN
@@ -124,8 +152,12 @@ class WPGAN:
         Returns: the gradient penalty for this batch
         """
 
+        # Dynamic shape for alpha
+        interp_shape = [1 for _ in range(len(real_sounds.shape))]
+        interp_shape[0] = batch_size
+
         # get the interpolated image
-        alpha = tf.random.normal([batch_size, 1, 1], 0.0, 1.0)
+        alpha = tf.random.normal(interp_shape, 0.0, 1.0)
         diff = fake_sounds - real_sounds
         interpolated = real_sounds + alpha * diff
 

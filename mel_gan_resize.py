@@ -13,20 +13,18 @@ class Resize(tf.keras.layers.Layer):
     def __init__(self, size=2, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR, **kwargs):
         super(Resize, self).__init__(**kwargs)
         self.size = int(size)
-        self.input_spec = InputSpec(ndim=3)
+        self.input_spec = InputSpec(ndim=4)
         self.method = method
 
     def compute_output_shape(self, input_shape):
         input_shape = tensor_shape.TensorShape(input_shape).as_list()
         size = self.size * input_shape[1] if input_shape[1] is not None else None
-        return tensor_shape.TensorShape([input_shape[0], size, input_shape[2]])
+        return tensor_shape.TensorShape([input_shape[0], size, size, input_shape[3]])
 
     def call(self, inputs):
         x = inputs
         x_shape = x.shape.as_list()
-        x = tf.expand_dims(x, axis=3)
-        x = tf.image.resize(x, [x_shape[1] * self.size, x_shape[2]], method=self.method)
-        x = x[:, :, :, 0]
+        x = tf.image.resize(x, [x_shape[1] * self.size, x_shape[2] * self.size], method=self.method)
         return x
 
     def get_config(self):
@@ -49,48 +47,48 @@ def make_generator_model(latent_size, method=tf.image.ResizeMethod.NEAREST_NEIGH
     if dropout > 0.0:
         model.add(layers.Dropout(dropout))
 
-    model.add(layers.Reshape((16, 1024)))
-    assert model.output_shape == (None, 16, 1024)  # Note: None is the batch size
+    model.add(layers.Reshape((4, 4, 1024)))
+    assert model.output_shape == (None, 4, 4, 1024)  # Note: None is the batch size
 
-    model.add(Resize(size=4, method=method))
-    model.add(layers.Conv1D(512, 25, strides=1, padding='same', use_bias=False))
-    assert model.output_shape == (None, 64, 512)
+    model.add(Resize(size=2, method=method))
+    model.add(layers.Conv2D(512, 5, strides=1, padding='same', use_bias=False))
+    assert model.output_shape == (None, 8, 8, 512)
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
     if dropout > 0.0:
         model.add(layers.Dropout(dropout))
 
-    model.add(Resize(size=4, method=method))
-    model.add(layers.Conv1D(256, 25, strides=1, padding='same', use_bias=False))
-    assert model.output_shape == (None, 256, 256)
+    model.add(Resize(size=2, method=method))
+    model.add(layers.Conv2D(256, 5, strides=1, padding='same', use_bias=False))
+    assert model.output_shape == (None, 16, 16, 256)
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
     if dropout > 0.0:
         model.add(layers.Dropout(dropout))
 
-    model.add(Resize(size=4, method=method))
-    model.add(layers.Conv1D(128, 25, strides=1, padding='same', use_bias=False))
-    assert model.output_shape == (None, 1024, 128)
+    model.add(Resize(size=2, method=method))
+    model.add(layers.Conv2D(128, 5, strides=1, padding='same', use_bias=False))
+    assert model.output_shape == (None, 32, 32, 128)
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
     if dropout > 0.0:
         model.add(layers.Dropout(dropout))
 
-    model.add(Resize(size=4, method=method))
-    model.add(layers.Conv1D(64, 25, strides=1, padding='same', use_bias=False))
-    assert model.output_shape == (None, 4096, 64)
+    model.add(Resize(size=2, method=method))
+    model.add(layers.Conv2D(64, 5, strides=1, padding='same', use_bias=False))
+    assert model.output_shape == (None, 64, 64, 64)
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
     if dropout > 0.0:
         model.add(layers.Dropout(dropout))
 
-    model.add(Resize(size=4, method=method))
-    model.add(layers.Conv1D(1, 25, strides=1, padding='same', use_bias=False, activation='tanh'))
-    assert model.output_shape == (None, 16384, 1)
+    model.add(Resize(size=2, method=method))
+    model.add(layers.Conv2D(1, 5, strides=1, padding='same', use_bias=False, activation='tanh'))
+    assert model.output_shape == (None, 128, 128, 1)
 
     return model
 
@@ -102,28 +100,28 @@ def make_discriminator_model():
     """
     model = tf.keras.Sequential()
 
-    model.add(layers.Conv1D(64, 25, 4, padding='same', input_shape=[16384, 1]))
-    assert (model.output_shape == (None, 4096, 64))
+    model.add(layers.Conv2D(64, 5, 2, padding='same', input_shape=[128, 128, 1]))
+    assert (model.output_shape == (None, 64, 64, 64))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(128, 25, 4, padding='same'))
-    assert (model.output_shape == (None, 1024, 128))
+    model.add(layers.Conv2D(128, 5, 2, padding='same'))
+    assert (model.output_shape == (None, 32, 32, 128))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(256, 25, 4, padding='same'))
-    assert (model.output_shape == (None, 256, 256))
+    model.add(layers.Conv2D(256, 5, 2, padding='same'))
+    assert (model.output_shape == (None, 16, 16, 256))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(512, 25, 4, padding='same'))
-    assert (model.output_shape == (None, 64, 512))
+    model.add(layers.Conv2D(512, 5, 2, padding='same'))
+    assert (model.output_shape == (None, 8, 8, 512))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(1024, 25, 4, padding='same'))
-    assert (model.output_shape == (None, 16, 1024))
+    model.add(layers.Conv2D(1024, 5, 2, padding='same'))
+    assert (model.output_shape == (None, 4, 4, 1024))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 

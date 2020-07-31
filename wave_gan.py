@@ -69,12 +69,12 @@ def make_discriminator_model(normalization="batch", dropout=0.0):
     """
     model = tf.keras.Sequential()
 
-    model.add(layers.Conv1D(64, 5, 4, padding='same', input_shape=[16384, 1]))
+    model.add(layers.Conv1D(64, 25, 4, padding='same', input_shape=[16384, 1]))
     assert (model.output_shape == (None, 4096, 64))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(128, 5, 4, padding='same'))
+    model.add(layers.Conv1D(128, 25, 4, padding='same'))
     assert (model.output_shape == (None, 1024, 128))
     if normalization == "batch":
         model.add(layers.BatchNormalization())
@@ -83,7 +83,7 @@ def make_discriminator_model(normalization="batch", dropout=0.0):
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(256, 5, 4, padding='same'))
+    model.add(layers.Conv1D(256, 25, 4, padding='same'))
     assert (model.output_shape == (None, 256, 256))
     if normalization == "batch":
         model.add(layers.BatchNormalization())
@@ -92,7 +92,7 @@ def make_discriminator_model(normalization="batch", dropout=0.0):
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(512, 5, 4, padding='same'))
+    model.add(layers.Conv1D(512, 25, 4, padding='same'))
     assert (model.output_shape == (None, 64, 512))
     if normalization == "batch":
         model.add(layers.BatchNormalization())
@@ -101,7 +101,7 @@ def make_discriminator_model(normalization="batch", dropout=0.0):
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv1D(1024, 5, 4, padding='same'))
+    model.add(layers.Conv1D(1024, 25, 4, padding='same'))
     assert (model.output_shape == (None, 16, 1024))
     if normalization == "batch":
         model.add(layers.BatchNormalization())

@@ -21,7 +21,8 @@ NUM_IMAGES = 4
 # Possible models to train
 models = {
     "wpgan": WPGAN,
-    "dcgan": DCGAN
+    "dcgan": DCGAN,
+    "melgan": WPGAN
 }
 
 
@@ -48,13 +49,37 @@ def load_dataset(filename, batch_size):
     return dataset
 
 
+def load_mel_dataset(filename, batch_size):
+    """
+    Load numpy object and convert to a TensorFlow dataset
+
+    Args:
+        filename (str): Location of numpy file
+        batch_size (int): Size for each batch
+
+    Returns:
+        tf.Dataset
+    """
+
+    data = np.load(filename)
+    data = data.reshape(data.shape[0], 128, 128, 1).astype('float32')
+
+    dataset = tf.data.Dataset.from_tensor_slices(data).shuffle(len(data)).batch(batch_size)
+    return dataset
+
+
 def save_images(test_batch, image_dir, image_prefix, model, epoch):
 
     predictions = model.generator(test_batch, training=False)
     fig = plt.figure(figsize=(2, 2))
     for i in range(predictions.shape[0]):
         plt.subplot(2, 2, i+1)
-        plt.plot(predictions[i, :, 0])
+
+        if len(predictions.shape) == 3:
+            plt.plot(predictions[i, :, 0])
+        elif len(predictions.shape) == 4:
+            plt.imshow(predictions[i, :, :, 0])
+
         plt.axis('off')
 
     filename = os.path.join(image_dir, '{}_image_at_epoch_{:04d}.png'.format(image_prefix, epoch))
@@ -77,7 +102,7 @@ def main(arguments):
     parser.add_argument('train_data', help="Location of .npy training data", type=str)
     parser.add_argument('-b', '--batch', default=64, help="Batch size", type=int)
     parser.add_argument('-e', '--epochs', default=50, help="Training epochs", type=int)
-    parser.add_argument('-m', '--model', default="wpgan", help="Model type: {dcgan, wpgan}", type=str)
+    parser.add_argument('-m', '--model', default="wpgan", help="Model type: {dcgan, wpgan, melgan}", type=str)
     parser.add_argument('-o', '--output', default=None, help="If set, save trained model to this file", type=str)
     parser.add_argument('-s', '--stats', default=None,
                         help="Save the loss/accuracy stats as JSON to this location", type=str)
@@ -96,9 +121,12 @@ def main(arguments):
                         action='store_const', const=False, default=True)
     parser.add_argument('-d', '--dropout', help="Generator Dropout", default=0.0, type=float)
 
-
     args = parser.parse_args(arguments)
-    dataset = load_dataset(args.train_data, args.batch)
+
+    if args.model == 'melgan':
+        dataset = load_mel_dataset(args.train_data, args.batch)
+    else:
+        dataset = load_dataset(args.train_data, args.batch)
 
     if args.stats and not os.path.exists(os.path.dirname(args.stats)):
         raise Exception("Directory for train stats location does not exist: {}".format(args.stats))
@@ -109,8 +137,11 @@ def main(arguments):
         'checkpoint_freq': args.ckpt_freq,
         'upsample': args.upsample,
         'batch_norm': args.batch_norm,
-        'dropout': args.dropout
+        'dropout': args.dropout,
     }
+
+    if args.model == "melgan":
+        kwargs['model'] = "mel"
 
     if args.ckpt_prefix:
         kwargs['checkpoint_prefix'] = args.ckpt_prefix
