@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 
 
-def make_generator_model(latent_size, normalization=True):
+def make_generator_model(latent_size, normalization=True, dropout=0.0):
     """
     Create the WaveGAN generator
     :return: Sequential Model
@@ -18,6 +18,8 @@ def make_generator_model(latent_size, normalization=True):
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.Reshape((16, 1024)))
     assert model.output_shape == (None, 16, 1024)  # Note: None is the batch size
@@ -27,24 +29,32 @@ def make_generator_model(latent_size, normalization=True):
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.Conv1DTranspose(256, 25, strides=4, padding='same', use_bias=False))
     assert model.output_shape == (None, 256, 256)
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.Conv1DTranspose(128, 25, strides=4, padding='same', use_bias=False))
     assert model.output_shape == (None, 1024, 128)
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.Conv1DTranspose(64, 25, strides=4, padding='same', use_bias=False))
     assert model.output_shape == (None, 4096, 64)
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.Conv1DTranspose(1, 25, strides=4, padding='same', use_bias=False, activation='tanh'))
     assert model.output_shape == (None, 16384, 1)
@@ -52,7 +62,7 @@ def make_generator_model(latent_size, normalization=True):
     return model
 
 
-def make_discriminator_model(normalization="batch"):
+def make_discriminator_model(normalization="batch", dropout=0.0):
     """
     Create the WaveGAN discriminator
     :return: Sequential Model

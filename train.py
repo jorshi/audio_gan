@@ -94,6 +94,7 @@ def main(arguments):
                         action='store_const', const=True, default=False)
     parser.add_argument('--no_norm', dest='batch_norm', help="Turn off generator batch normalization",
                         action='store_const', const=False, default=True)
+    parser.add_argument('-d', '--dropout', help="Generator Dropout", default=0.0, type=float)
 
 
     args = parser.parse_args(arguments)
@@ -107,7 +108,8 @@ def main(arguments):
         'checkpoint_dir': args.ckpt_dir,
         'checkpoint_freq': args.ckpt_freq,
         'upsample': args.upsample,
-        'batch_norm': args.batch_norm
+        'batch_norm': args.batch_norm,
+        'dropout': args.dropout
     }
 
     if args.ckpt_prefix:

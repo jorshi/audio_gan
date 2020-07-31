@@ -8,7 +8,7 @@ from tensorflow.keras import layers
 #from keras.backend import tf as ktf
 
 
-def make_generator_model(latent_size, normalization=True):
+def make_generator_model(latent_size, normalization=True, dropout=0.0):
     """
     Create the WaveGAN generator
     :return: Sequential Model
@@ -18,6 +18,8 @@ def make_generator_model(latent_size, normalization=True):
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.Reshape((16, 1024)))
     assert model.output_shape == (None, 16, 1024)  # Note: None is the batch size
@@ -28,6 +30,8 @@ def make_generator_model(latent_size, normalization=True):
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(256, 25, strides=1, padding='same', use_bias=False))
@@ -35,6 +39,8 @@ def make_generator_model(latent_size, normalization=True):
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(128, 25, strides=1, padding='same', use_bias=False))
@@ -42,6 +48,8 @@ def make_generator_model(latent_size, normalization=True):
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(64, 25, strides=1, padding='same', use_bias=False))
@@ -49,6 +57,8 @@ def make_generator_model(latent_size, normalization=True):
     if normalization:
         model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
+    if dropout > 0.0:
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.UpSampling1D(size=4))
     model.add(layers.Conv1D(1, 25, strides=1, padding='same', use_bias=False, activation='tanh'))
